@@ -1,56 +1,109 @@
-import grpc
-import golf_service_pb2
-import golf_service_pb2_grpc
-from concurrent import futures
 
-def record_shot(stub):
-    shot = golf_service_pb2.Shot(
-        club="7-IRON",
-        distance=150.5,
-        result="FAIRWAY",
-        notes="Nice clean hit"
-    )
-    
-    response = stub.RecordShot(shot)
-    print(f"Shot recorded: {response.message}")
-    print(f"Shot details: ID={response.shot.id}, Distance={response.shot.distance}")
+# Golf Shot Tracker
 
-def get_statistics(stub):
-    request = golf_service_pb2.StatisticsRequest(
-        club="7-IRON"  # Optional filter
-    )
-    
-    stats = stub.GetStatistics(request)
-    print(f"\nStatistics:")
-    print(f"Average distance: {stats.average_distance:.2f} yards")
-    print(f"Total shots: {stats.total_shots}")
-    print("Result distribution:")
-    for result, count in stats.result_distribution.items():
-        print(f"  {result}: {count}")
+A real-time golf shot tracking application using gRPC, React, and Python.
 
-def stream_shots(stub):
-    print("\nStreaming recent shots (press Ctrl+C to stop)...")
-    request = golf_service_pb2.StreamRequest(limit=10)
-    try:
-        for shot in stub.StreamRecentShots(request):
-            print(f"New shot: {shot.club} - {shot.distance} yards - {shot.result}")
-    except KeyboardInterrupt:
-        print("\nStopped streaming")
+## Prerequisites
 
-def main():
-    with grpc.insecure_channel('localhost:50051') as channel:
-        stub = golf_service_pb2_grpc.ShotTrackerServiceStub(channel)
-        
-        # Record a few shots
-        print("Recording shots...")
-        for _ in range(3):
-            record_shot(stub)
-        
-        # Get statistics
-        get_statistics(stub)
-        
-        # Stream new shots
-        stream_shots(stub)
+- Python 3.8+
+- Node.js 16+
+- Protocol Buffers compiler (protoc)
+- Docker (for Envoy proxy)
 
-if __name__ == '__main__':
-    main()
+## Project Structure
+golf-shot-tracker/
+├── proto/ # Protocol Buffer definitions
+│ └── golf_service.proto
+├── backend/ # Python gRPC server
+│ ├── generated/ # Generated Python code
+│ ├── requirements.txt
+│ └── server.py
+├── frontend/ # React frontend
+│ ├── src/
+│ │ ├── generated/ # Generated TypeScript code
+│ │ └── components/
+│ └── package.json
+├── scripts/
+│ ├── generate-backend.sh
+│ └── generate-frontend.sh
+└── docker-compose.yml # Envoy proxy configuration
+
+
+## Quick Start
+
+1. Clone the repository:
+bash
+git clone git@github.com:akhilbandhu/grpc-golf-tracker.git
+cd grpc-golf-tracker
+
+2. Run the setup script:
+bash
+chmod +x setup.sh
+./setup.sh
+
+
+This will:
+- Install all dependencies
+- Generate code from Protocol Buffers
+- Start the backend server
+- Start the frontend development server
+- Start the Envoy proxy
+
+The application will be available at:
+- Frontend: http://localhost:3000
+- Backend: localhost:50051
+- Envoy Proxy: localhost:8080
+
+## Development
+
+### Regenerating Code
+After modifying the proto file, regenerate the code:
+
+#### Backend
+python -m grpc_tools.protoc \
+    -I=proto \
+    --python_out=backend \
+    --grpc_python_out=backend \
+    --pyi_out=backend \
+    proto/golf_service.proto
+
+#### Frontend
+cd frontend
+protoc \
+    --plugin=protoc-gen-ts_proto=./node_modules/.bin/protoc-gen-ts_proto \
+    --ts_proto_out=./src/generated \
+    --ts_proto_opt=esModuleInterop=true \
+    --ts_proto_opt=outputClientImpl=grpc-web \
+    --proto_path=../proto \
+    ../proto/golf_service.proto
+
+
+### Backend Development
+
+The backend uses Python with gRPC. Key files:
+- `proto/golf_service.proto`: Service definitions
+- `backend/server.py`: gRPC server implementation
+- `backend/golf_service_pb2.py`: Generated Python code
+
+### Frontend Development
+
+The frontend uses React with gRPC-Web. Key files:
+- `frontend/src/GolfService.ts`: gRPC client setup
+- `frontend/src/generated/`: Generated TypeScript code
+- `frontend/src/components/`: React components
+
+## Architecture
+
+1. **Frontend**: React application using gRPC-Web for API calls
+2. **Envoy Proxy**: Translates gRPC-Web calls to gRPC
+3. **Backend**: Python gRPC server handling business logic
+
+## API Documentation
+
+The gRPC service provides the following endpoints:
+
+1. `RecordShot`: Record a new golf shot
+2. `GetStatistics`: Retrieve shot statistics
+3. `StreamRecentShots`: Stream real-time shot updates
+
+For detailed API documentation, see the proto file
