@@ -32,7 +32,6 @@ frontend/yarn-error.log*
 backend/golf_service_pb2.py
 backend/golf_service_pb2_grpc.py
 backend/golf_service_pb2.pyi
-frontend/src/generated/
 
 # Environment variables
 .env
