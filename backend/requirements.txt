@@ -1,0 +1,4 @@
+grpcio
+grpcio-tools
+protobuf
+setuptools>=65.5.1

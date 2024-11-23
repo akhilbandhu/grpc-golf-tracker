@@ -1,0 +1,79 @@
+syntax = "proto3";
+
+package golf;
+
+// Golf Shot Tracker Service
+// Provides functionality for recording golf shots, calculating statistics,
+// and streaming real-time updates.
+service ShotTrackerService {
+  // Record a new golf shot with details like club used, distance, and result
+  rpc RecordShot (Shot) returns (ShotResponse);
+  
+  // Retrieve statistics about recorded shots, optionally filtered by club and date range
+  rpc GetStatistics (StatisticsRequest) returns (StatisticsResponse);
+  
+  // Stream recent shots and receive real-time updates as new shots are recorded
+  rpc StreamRecentShots (StreamRequest) returns (stream Shot);
+}
+
+// Represents different types of golf clubs
+enum Club {
+  CLUB_UNSPECIFIED = 0;  // Default value for proto3
+  DRIVER = 1;
+  THREE_WOOD = 2;
+  FIVE_WOOD = 3;
+  FOUR_IRON = 4;
+  FIVE_IRON = 5;
+  SIX_IRON = 6;
+  SEVEN_IRON = 7;
+  EIGHT_IRON = 8;
+  NINE_IRON = 9;
+  PITCHING_WEDGE = 10;
+  SAND_WEDGE = 11;
+  LOFT_WEDGE = 12;
+  PUTTER = 13;
+}
+
+// Represents possible results of a golf shot
+enum ShotResult {
+  RESULT_UNSPECIFIED = 0;  // Default value for proto3
+  FAIRWAY = 1;             // Shot landed on fairway
+  GREEN = 2;               // Shot landed on green
+  ROUGH = 3;               // Shot landed in rough
+  BUNKER = 4;             // Shot landed in sand bunker
+  WATER = 5;              // Shot landed in water hazard
+  OUT_OF_BOUNDS = 6;      // Shot went out of bounds
+}
+
+// Represents a single golf shot with all relevant details
+message Shot {
+  string id = 1;              // Unique identifier for the shot
+  Club club = 2;             // Club used for the shot
+  float distance = 3;         // Distance in yards
+  ShotResult result = 4;      // Where the shot landed
+  string notes = 5;           // Additional notes about the shot
+  int64 timestamp = 6;        // When the shot was recorded
+}
+
+message ShotResponse {
+  bool success = 1;           // Whether the shot was successfully recorded
+  string message = 2;         // Response message
+  Shot shot = 3;             // The recorded shot details
+}
+
+message StatisticsRequest {
+  Club club = 1;             // Optional: filter by club
+  int64 from_date = 2;       // Optional: start date for filtering (unix timestamp)
+  int64 to_date = 3;         // Optional: end date for filtering (unix timestamp)
+}
+
+message StatisticsResponse {
+  float average_distance = 1;                     // Average distance of filtered shots
+  int32 total_shots = 2;                         // Total number of shots matching filter
+  map<string, int32> result_distribution = 3;    // Distribution of shot results
+  repeated Shot recent_shots = 4;                // Most recent shots matching filter
+}
+
+message StreamRequest {
+  int32 limit = 1;           // Number of recent shots to stream
+}

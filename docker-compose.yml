@@ -1,0 +1,9 @@
+version: '3'
+services:
+  envoy:
+    image: envoyproxy/envoy:v1.28-latest
+    ports:
+      - "8080:8080"  # gRPC-Web proxy
+      - "9901:9901"  # Admin interface
+    volumes:
+      - ./envoy.yaml:/etc/envoy/envoy.yaml
