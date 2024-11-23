@@ -11,6 +11,7 @@ A real-time golf shot tracking application using gRPC, React, and Python.
 - Docker (for Envoy proxy)
 
 ## Project Structure
+```text
 golf-shot-tracker/
 ├── proto/ # Protocol Buffer definitions
 │ └── golf_service.proto
@@ -27,20 +28,20 @@ golf-shot-tracker/
 │ ├── generate-backend.sh
 │ └── generate-frontend.sh
 └── docker-compose.yml # Envoy proxy configuration
-
+```
 
 ## Quick Start
 
 1. Clone the repository:
-bash
+```bash
 git clone git@github.com:akhilbandhu/grpc-golf-tracker.git
 cd grpc-golf-tracker
-
+```
 2. Run the setup script:
-bash
+```bash
 chmod +x setup.sh
 ./setup.sh
-
+```
 
 This will:
 - Install all dependencies
@@ -60,14 +61,16 @@ The application will be available at:
 After modifying the proto file, regenerate the code:
 
 #### Backend
+```bash
 python -m grpc_tools.protoc \
     -I=proto \
     --python_out=backend \
     --grpc_python_out=backend \
     --pyi_out=backend \
     proto/golf_service.proto
-
+```
 #### Frontend
+```bash
 cd frontend
 protoc \
     --plugin=protoc-gen-ts_proto=./node_modules/.bin/protoc-gen-ts_proto \
@@ -76,7 +79,7 @@ protoc \
     --ts_proto_opt=outputClientImpl=grpc-web \
     --proto_path=../proto \
     ../proto/golf_service.proto
-
+```
 
 ### Backend Development
 
